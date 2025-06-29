@@ -1,15 +1,52 @@
-var redis = require('redis');
-const Promise = require('promise');
+// // var redis = require('redis');
+// const Promise = require('promise');
+// const debug = require("debug")("darwin:Helpers:Redis");
+// const {createClient}=require('redis')
+
+// const expire = 600;
+
+// // var client = redis.createClient(process.env.REDIS_PORT || '6379', process.env.REDIS_HOST || '127.0.0.1');
+// //var client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+// var client = createClient({url: process.env.REDIS_HOST});
+
+
+// client.on('connect', function () {
+//     debug('redis connected');
+// });
+
+
+
+const { createClient } = require('redis');
 const debug = require("debug")("darwin:Helpers:Redis");
+const Promise = require('promise'); // Not required unless used elsewhere
 
 const expire = 600;
 
-var client = redis.createClient(process.env.REDIS_PORT || '6379', process.env.REDIS_HOST || '127.0.0.1');
-//var client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
+// ✅ Use the correct environment variable (typically named REDIS_URL or REDIS_URI)
+const redisUrl = process.env.REDIS_HOST || 'redis://127.0.0.1:6379'; // fallback to localhost
+
+// ✅ Use createClient({ url }) syntax
+const client = createClient({
+    url: redisUrl
+});
+
 
 client.on('connect', function () {
-    debug('redis connected');
+    debug('Redis connected');
 });
+
+client.on('error', function (err) {
+    debug('Redis Client Error', err);
+});
+
+
+(async () => {
+    try {
+        await client.connect();
+    } catch (err) {
+        debug('Redis connection failed:', err);
+    }
+})();
 
 exports.getRedisKeys = function (pattern) {
     return new Promise(function (resolve, reject) {
