@@ -2,8 +2,8 @@ const Mongoose = require("mongoose");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
 const mongooseObjectId = Mongoose.Types.ObjectId;
 const mongooseAutoIncrement = require('mongoose-auto-increment');
-require('mongoose-double')(Mongoose);
-const DoubleType = Mongoose.Schema.Types.Double;
+// require('mongoose-double')(Mongoose);
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 
 const WorkingOfferLog = Mongoose.Schema({
 

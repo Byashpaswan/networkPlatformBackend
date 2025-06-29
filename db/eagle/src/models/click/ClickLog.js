@@ -1,9 +1,9 @@
 const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:clickLog");
-require('mongoose-double')(Mongoose);
+// require('mongoose-double')(Mongoose);
 const objectIdType = Mongoose.Schema.Types.ObjectId;
 const mongooseObjectId = Mongoose.Types.ObjectId;
-const DoubleType = Mongoose.Schema.Types.Double;
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 const { config } = require("../../constants/index");
 const Creative = require("../offer/Creative");
 const { getConstLabel, getConstValue } = require("../../helper/Util");

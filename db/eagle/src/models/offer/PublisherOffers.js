@@ -2,7 +2,7 @@ const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:PublisherOffers");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
 const mongooseObjectId = Mongoose.Types.ObjectId;
-require('mongoose-double')(Mongoose);
+// require('mongoose-double')(Mongoose);
 const SchemaDouble = Mongoose.Schema.Types.Double;
 const OfferCapping = require('./Capping');
 const { DeviceTargeting, GeoTargeting } = require('./Targeting');

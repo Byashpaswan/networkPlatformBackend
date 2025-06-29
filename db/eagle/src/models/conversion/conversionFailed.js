@@ -1,7 +1,7 @@
 const Mongoose = require("mongoose");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
 const mongooseObjectId = Mongoose.Types.ObjectId;
-const DoubleType = Mongoose.Schema.Types.Double;
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 
 const ConversionFailedLog = Mongoose.Schema(
   {

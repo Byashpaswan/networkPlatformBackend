@@ -1,7 +1,7 @@
 const Mongoose = require("mongoose");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-require("mongoose-double")(Mongoose);
-const DoubleType = Mongoose.Schema.Types.Double;
+// require("mongoose-double")(Mongoose);
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 const { config } = require("../../constants/index");
 const OfferCapping = require("./Capping");
 const Goal = require("./Goals");

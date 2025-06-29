@@ -1,9 +1,9 @@
 const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:Conversion");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-require("mongoose-double")(Mongoose);
+// require("mongoose-double")(Mongoose);
 const mongooseObjectId = Mongoose.Types.ObjectId;
-const DoubleType = Mongoose.Schema.Types.Double;
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 
 const NESTED_GOALS = Mongoose.Schema({
 goal: {

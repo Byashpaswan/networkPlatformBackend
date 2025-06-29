@@ -2,8 +2,8 @@ const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:OfferCapping");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
 const mongooseObjectId = Mongoose.Types.ObjectId;
-require('mongoose-double')(Mongoose);
-const DoubleType = Mongoose.Schema.Types.Double;
+// require('mongoose-double')(Mongoose);
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 const { config } = require('../../constants/index');
 
 const OfferCapping = Mongoose.Schema({

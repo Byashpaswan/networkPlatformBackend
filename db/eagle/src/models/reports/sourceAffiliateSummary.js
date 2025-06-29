@@ -1,8 +1,8 @@
 const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:SourceAffiliateSummary");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-require("mongoose-double")(Mongoose);
-const DoubleType = Mongoose.Schema.Types.Double;
+// require("mongoose-double")(Mongoose);
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 
 const SourceAffiliateSummary = Mongoose.Schema(
   {

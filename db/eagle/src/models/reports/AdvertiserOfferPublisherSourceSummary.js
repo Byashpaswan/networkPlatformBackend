@@ -1,7 +1,7 @@
 const Mongoose = require("mongoose");
 const ObjectId = Mongoose.Schema.Types.ObjectId;
-require("mongoose-double")(Mongoose);
-const Double = Mongoose.Schema.Types.Double;
+// require("mongoose-double")(Mongoose);
+const Double = Mongoose.Schema.Types.Decimal128;
 
 const AdvertiserOfferPublisherSourceSummary = Mongoose.Schema(
   {

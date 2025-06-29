@@ -1,7 +1,7 @@
 const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:AppIdSummary");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-const DoubleType = Mongoose.Schema.Types.Double;
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 
 const AppIdSummary = Mongoose.Schema({
     network_id: {

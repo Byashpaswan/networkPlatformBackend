@@ -1,7 +1,7 @@
 const Mongoose = require("mongoose");
 const debug = require("debug")("eagle:models:Advertiser");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-const DoubleType = Mongoose.Schema.Types.Double;
+const DoubleType = Mongoose.Schema.Types.Decimal128;
 const mongooseObjectId = Mongoose.Types.ObjectId;
 // const OfferCapping = require('./Capping');
 // const { getConstLabel, getConstValue } = require('../helper/Util');

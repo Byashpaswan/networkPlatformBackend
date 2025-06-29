@@ -1,6 +1,6 @@
 const Mongoose = require("mongoose");
 const objectIdType = Mongoose.Schema.Types.ObjectId;
-require('mongoose-double')(Mongoose);
+// require('mongoose-double')(Mongoose);
 
 const wishList = Mongoose.Schema({
 
