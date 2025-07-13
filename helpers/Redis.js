@@ -23,14 +23,17 @@ const Promise = require('promise'); // Not required unless used elsewhere
 const expire = 600;
 
 // ✅ Use the correct environment variable (typically named REDIS_URL or REDIS_URI)
-const redisUrl = process.env.REDIS_HOST || 'redis://127.0.0.1:6379'; // fallback to localhost
+const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379'; // fallback to localhost
+if (!redisUrl) {
+  throw new Error('❌ REDIS URL is not defined in environment variables.');
+}
 
 // ✅ Use createClient({ url }) syntax
 const client = createClient({
     url: redisUrl,
       socket: {
       tls: true, // 🔐 Upstash requires TLS
-    reconnectStrategy: retries => {
+      reconnectStrategy: retries => {
       console.log(`🔁 Redis reconnecting attempt ${retries}`);
       return Math.min(retries * 100, 3000);
     }
