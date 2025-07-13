@@ -44,7 +44,8 @@ const client = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
         host: redisUrl,
-        port: 14114
+        port: 14114,
+        tls: true
     }
 });
 
