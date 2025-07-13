@@ -27,7 +27,14 @@ const redisUrl = process.env.REDIS_HOST || 'redis://127.0.0.1:6379'; // fallback
 
 // ✅ Use createClient({ url }) syntax
 const client = createClient({
-    url: redisUrl
+    url: redisUrl,
+      socket: {
+      tls: true, // 🔐 Upstash requires TLS
+    reconnectStrategy: retries => {
+      console.log(`🔁 Redis reconnecting attempt ${retries}`);
+      return Math.min(retries * 100, 3000);
+    }
+  }
 });
 
 
