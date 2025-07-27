@@ -4,11 +4,13 @@ Mongoose.Promise = Promise;
 
 let options = {
   useNewUrlParser: true,
-  useCreateIndex: true,
-  autoIndex: false,
+  // useCreateIndex: true,
+  // autoIndex: false,
   useUnifiedTopology: true,
-  useFindAndModify:false,
+  // useFindAndModify:false,
 };
+
+console.log('🔗 Connecting to MongoDB at:', process.env.MONGODB);
 
 if (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV ==='stage' ) {
   options = {
@@ -22,8 +24,12 @@ if (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV ==='stage' ) {
 
 Mongoose.connect(process.env.MONGODB, options);
 const connection = Mongoose.connection;
-connection.on('error', function () {
-  console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
+// connection.on('error', function () {
+//   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
+//   process.exit(1);
+connection.on('error', function (err) {
+  console.error('❌ MongoDB Connection Error:', err.message);
+  console.error('Full error:', err);
   process.exit(1);
 });
 

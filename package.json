@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "if-env NODE_ENV=prod || NODE_ENV=stage ?? npm run start:prod || npm run start:dev",
-    "start:prod": "node ./bin/www",
-    "start:dev": "DEBUG=darwin* nodemon --inspect ./bin/www"
+    "start:prod": "cross-env NODE_ENV=production node ./bin/www",
+    "start:dev": "cross-env DEBUG=darwin* nodemon --inspect ./bin/www"
   },
   "dependencies": {
     "agenda": "^4.0.1",
@@ -19,6 +19,7 @@
     "connect-multiparty": "^2.2.0",
     "cookie-parser": "~1.4.3",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "crypto-js": "^3.1.9-1",
     "csurf": "^1.10.0",
     "csv-parser": "^2.3.2",
@@ -50,7 +51,7 @@
     "promise": "^8.0.3",
     "puppeteer": "^8.0.0",
     "randomstring": "^1.1.5",
-    "redis": "^2.8.0",
+    "redis": "^4.7.1",
     "request": "^2.88.2",
     "request-ip": "^2.1.3",
     "request-promise": "^4.2.6",

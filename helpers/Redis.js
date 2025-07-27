@@ -1,52 +1,64 @@
-// // var redis = require('redis');
-// const Promise = require('promise');
-// const debug = require("debug")("darwin:Helpers:Redis");
-// const {createClient}=require('redis')
-
-// const expire = 600;
-
-// // var client = redis.createClient(process.env.REDIS_PORT || '6379', process.env.REDIS_HOST || '127.0.0.1');
-// //var client = redis.createClient(process.env.REDIS_PORT, process.env.REDIS_HOST);
-// var client = createClient({url: process.env.REDIS_HOST});
-
-
-// client.on('connect', function () {
-//     debug('redis connected');
-// });
-
-
-
-const { createClient } = require('redis');
+// var redis = require('redis');
+const Promise = require('promise');
 const debug = require("debug")("darwin:Helpers:Redis");
-const Promise = require('promise'); // Not required unless used elsewhere
+const {createClient}=require('redis')
 
 const expire = 600;
 
-// ✅ Use the correct environment variable (typically named REDIS_URL or REDIS_URI)
-const redisUrl = process.env.REDIS_HOST || 'redis://127.0.0.1:6379'; // fallback to localhost
+// var client = redis.createClient(process.env.REDIS_PORT || '6379', process.env.REDIS_HOST || '127.0.0.1');
 
-// ✅ Use createClient({ url }) syntax
 const client = createClient({
-    url: redisUrl
+  socket: {
+    host: process.env.REDIS_HOST || 'redis-14114.c84.us-east-1-2.ec2.redns.redis-cloud.com',
+    port:process.env.REDIS_PORT || 6379
+  },
+  username: 'default',
+  password:process.env.REDIS_PASSWORD ||'rFew2iVCPcOGQYAUcpSQJ1aJWNWOOHKN'
 });
 
-
-client.on('connect', function () {
-    debug('Redis connected');
+// Logging events
+client.on('connect', () => {
+  debug('redis connected');
 });
 
-client.on('error', function (err) {
-    debug('Redis Client Error', err);
+client.on('error', (err) => {
+  debug('Redis Client Error', err);
 });
 
+// ✅ Async function to connect Redis
+async function runRedis() {
+  try {
+    await client.connect();
+    debug('Redis client is ready');
+  } catch (err) {
+    debug('Error connecting to Redis:', err);
+  }
+}
 
-(async () => {
-    try {
-        await client.connect();
-    } catch (err) {
-        debug('Redis connection failed:', err);
-    }
-})();
+// Run connection
+runRedis();
+
+
+
+// const { createClient } = require('redis');
+// const debug = require("debug")("darwin:Helpers:Redis");
+// const Promise = require('promise'); // Not required unless used elsewhere
+
+// const expire = 600;
+
+// //  Use the correct environment variable (typically named REDIS_URL or REDIS_URI)
+// const redisUrl = process.env.REDIS_HOST || 'redis://127.0.0.1:6379'; // fallback to localhost
+
+// //  Use createClient({ url }) syntax
+// const client = createClient({
+//     url: redisUrl,
+//      socket: {
+//         tls: redisUrl.startsWith("rediss://"), //  Enable TLS only for rediss
+//         rejectUnauthorized: false              //  In case cert verification fails (Upstash works with this)
+//   }
+// });
+
+
 
 exports.getRedisKeys = function (pattern) {
     return new Promise(function (resolve, reject) {
