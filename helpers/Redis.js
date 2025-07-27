@@ -27,7 +27,7 @@ const expire = 600;
 const client = createClient({
   socket: {
     host: process.env.REDIS_HOST || 'redis-14114.c84.us-east-1-2.ec2.redns.redis-cloud.com',
-    port:process.env.REDIS_PORT || 6379
+    port:Number(process.env.REDIS_PORT)|| 14114
   },
   username: 'default',
   password:process.env.REDIS_PASSWORD ||'rFew2iVCPcOGQYAUcpSQJ1aJWNWOOHKN'
