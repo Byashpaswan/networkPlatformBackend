@@ -20,52 +20,49 @@ const { createClient } = require('redis');
 const debug = require("debug")("darwin:Helpers:Redis");
 const Promise = require('promise'); // Not required unless used elsewhere
 
+const Promise = require('promise');
+const debug = require("debug")("darwin:Helpers:Redis");
+const {createClient}=require('redis')
+
 const expire = 600;
 
-// ✅ Use the correct environment variable (typically named REDIS_URL or REDIS_URI)
-const redisUrl = process.env.REDIS_HOST || 'redis-14114.c84.us-east-1-2.ec2.redns.redis-cloud.com'; // fallback to localhost
-if (!redisUrl) {
-  throw new Error('❌ REDIS URL is not defined in environment variables.');
+// var client = redis.createClient(process.env.REDIS_PORT || '6379', process.env.REDIS_HOST || '127.0.0.1');
+
+const client = createClient({
+  socket: {
+    host: process.env.REDIS_HOST || 'redis-14114.c84.us-east-1-2.ec2.redns.redis-cloud.com',
+    port:process.env.REDIS_PORT || 6379
+  },
+  username: 'default',
+  password:process.env.REDIS_PASSWORD ||'rFew2iVCPcOGQYAUcpSQJ1aJWNWOOHKN'
+});
+
+// Logging events
+client.on('connect', () => {
+  debug('redis connected');
+});
+
+client.on('error', (err) => {
+  debug('Redis Client Error', err);
+});
+
+// ✅ Async function to connect Redis
+async function runRedis() {
+  try {
+    await client.connect();
+    debug('Redis client is ready');
+  } catch (err) {
+    debug('Error connecting to Redis:', err);
+  }
 }
 
-// ✅ Use createClient({ url }) syntax
-// const client = createClient({
-//     url: redisUrl,
-//       socket: {
-//       tls: true, // 🔐 Upstash requires TLS
-//       reconnectStrategy: retries => {
-//       console.log(`🔁 Redis reconnecting attempt ${retries}`);
-//       return Math.min(retries * 100, 3000);
-//     }
-//   }
-// });
-const client = createClient({
-    username: 'default',
-    password: process.env.REDIS_PASSWORD,
-    socket: {
-        host: redisUrl,
-        port: 14114,
-        tls: true
-    }
-});
+// Run connection
+runRedis();
 
 
-client.on('connect', function () {
-    debug('Redis connected');
-});
-
-client.on('error', function (err) {
-    debug('Redis Client Error', err);
-});
 
 
-(async () => {
-    try {
-        await client.connect();
-    } catch (err) {
-        debug('Redis connection failed:', err);
-    }
-})();
+
 
 exports.getRedisKeys = function (pattern) {
     return new Promise(function (resolve, reject) {
