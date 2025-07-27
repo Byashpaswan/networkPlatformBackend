@@ -16,10 +16,6 @@
 
 
 
-const { createClient } = require('redis');
-const debug = require("debug")("darwin:Helpers:Redis");
-const Promise = require('promise'); // Not required unless used elsewhere
-
 const Promise = require('promise');
 const debug = require("debug")("darwin:Helpers:Redis");
 const {createClient}=require('redis')
