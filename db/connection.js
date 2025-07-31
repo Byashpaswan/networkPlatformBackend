@@ -19,6 +19,7 @@ if (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV ==='stage' ) {
     }
   };
 }
+console.log('MongoDB URI:', process.env.MONGODB);
 
 Mongoose.connect(process.env.MONGODB, options);
 const connection = Mongoose.connection;
