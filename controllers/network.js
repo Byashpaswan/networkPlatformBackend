@@ -68,22 +68,22 @@ exports.RegisterNetwork=function(req, res){
               pincode: req.body.pincode.trim(),
               country:req.body.country.trim()
             },
-           fD:[{
-                aHN:req.body.company_name.trim(),
-                aN:req.body.accountNumber.trim(),
-                ifcs:req.body.ifcsCode.trim(),
-                bN:req.body.bankName.trim(),
-                call:req.body.mob.trim(),
-                aType:req.body.accountType,
-                usd:req.body.usd||false,
-                addr:req.body.addr.trim()
-              }],
-             wc:req.body.wc.trim(),
-             rT:req.body.Rt.trim(),
-             payoneerId:req.body.payoneerId.trim(),
-             gstin:req.body.GSTIN.trim(),
-             ppId:req.body.ppId,
-             sac:req.body.sac.trim(),
+           // fD:[{
+           //      aHN:req.body.company_name.trim(),
+           //      aN:req.body.accountNumber.trim(),
+           //      ifcs:req.body.ifcsCode.trim(),
+           //      bN:req.body.bankName.trim(),
+           //      call:req.body.mob.trim(),
+           //      aType:req.body.accountType,
+           //      usd:req.body.usd||false,
+           //      addr:req.body.addr.trim()
+           //    }],
+           //   wc:req.body.wc.trim(),
+           //   rT:req.body.Rt.trim(),
+           //   payoneerId:req.body.payoneerId.trim(),
+           //   gstin:req.body.GSTIN.trim(),
+           //   ppId:req.body.ppId,
+           //   sac:req.body.sac.trim(),
 
             network_unique_id:req.body.network_unique_id.trim() ,
             domain :{
@@ -91,7 +91,7 @@ exports.RegisterNetwork=function(req, res){
               tracker:"tracker",
               api:"api"
             },
-            payCal:req.body.payCal||'min',
+            // payCal:req.body.payCal||'min',
             current_timezone: req.body.current_timezone.trim(),
             });
             // ============================saving network=======================
