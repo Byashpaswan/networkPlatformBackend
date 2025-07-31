@@ -24,6 +24,7 @@ Mongoose.connect(process.env.MONGODB, options);
 const connection = Mongoose.connection;
 connection.on('error', function () {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
+   console.error('MongoDB Connection Error:', error.message);
   process.exit(1);
 });
 
