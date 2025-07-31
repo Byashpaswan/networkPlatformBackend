@@ -22,9 +22,9 @@ if (process.env.NODE_ENV === 'prod' || process.env.NODE_ENV ==='stage' ) {
 
 Mongoose.connect(process.env.MONGODB, options);
 const connection = Mongoose.connection;
-connection.on('error', function () {
+connection.on('error', function (err) {
   console.log('MongoDB Connection Error. Please make sure that MongoDB is running.');
-   console.error('MongoDB Connection Error:', error.message);
+ console.error('MongoDB Connection Error:', err.message);
   process.exit(1);
 });
 
