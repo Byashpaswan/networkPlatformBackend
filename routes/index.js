@@ -15,7 +15,7 @@ const AllAppIdReportRouter = require('../routes/allAppIdReport/AllAppIdReportRou
 // script for storing currencies
 // var curr = require("../scripts/currency");
 // indexRouter.get('/setCurr',curr.saveCurrency);
-const chatRouter=require('./chatSupports/chatSupport')
+// const chatRouter=require('./chatSupports/chatSupport')
 
 
 indexRouter.use('/user', UserRouter);
@@ -24,7 +24,7 @@ indexRouter.use('/publisher', PublisherRouter);
 indexRouter.use('/api', apiRouter);
 indexRouter.use('/integration', IntegrationRouter);
 indexRouter.use('/report', AllAppIdReportRouter);
-indexRouter.use('/chat', chatRouter);
+// indexRouter.use('/chat', chatRouter);
 
 // **external page link for registerPublisher
 indexRouter.use('/registerPublisher', publisher)
