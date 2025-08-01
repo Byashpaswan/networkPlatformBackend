@@ -680,27 +680,27 @@ exports.getRedisHashDataByKeys = function (key, fieldsArray) {
     })
 }
 
-exports.setDataInRedisSortedSet = function (args, exp) {
-    return new Promise(function (resolve, reject) {
+// exports.setDataInRedisSortedSet = function (args, exp) {
+//     return new Promise(function (resolve, reject) {
 
-        client.zadd(args, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                })
-            }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(args[0], exp, function (err) {
-                if (err) { debug("could not set expiry to sorted set", args[0]) }
-            })
-            resolve({
-                error: false,
-                data: result,
-            })
-        })
-    })
-}
+//         client.zadd(args, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                 })
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(args[0], exp, function (err) {
+//                 if (err) { debug("could not set expiry to sorted set", args[0]) }
+//             })
+//             resolve({
+//                 error: false,
+//                 data: result,
+//             })
+//         })
+//     })
+// }
 
 exports.removeDataFromRedisSortedSet = function (key, member) {
     return new Promise(function (resolve, reject) {
@@ -741,85 +741,164 @@ exports.getDataFromRedisSortedSet = function (args) {
     })
 }
 
-exports.getAllDataFromRedisSortedSet = function (key) {
-    let args=[key,0,-1,'WITHSCORES']
-    return new Promise(function (resolve, reject) {
-        client.zrange(args, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                })
-            }
-            let result2 = {};
-            if (result && result.length) {
-                for (let i = 0; i < result.length; i += 2) {
-                    result2[result[i]] = parseFloat(result[i + 1])
-                }
-            }
-            resolve({
-                error: false,
-                data: result2,
-            })
-        })
-    })
-}
+// exports.getAllDataFromRedisSortedSet = function (key) {
+//     let args=[key,0,-1,'WITHSCORES']
+//     return new Promise(function (resolve, reject) {
+//         client.zrange(args, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                 })
+//             }
+//             let result2 = {};
+//             if (result && result.length) {
+//                 for (let i = 0; i < result.length; i += 2) {
+//                     result2[result[i]] = parseFloat(result[i + 1])
+//                 }
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result2,
+//             })
+//         })
+//     })
+// }
+exports.getAllDataFromRedisSortedSet = async function (key) {
+  try {
+    const result = await client.zRange(key, 0, -1, { WITHSCORES: true }); // v4 format
 
-exports.getLengthFromRedisSortedSet=function(key){
-    return new Promise(function(resolve,reject){
-        client.zcard(key,function(err,result){
-            if(err){
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while getting count in redis'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis set'
-            })
-        })
-    })
-}
+    // Redis v4 returns an object: { member1: score1, member2: score2, ... }
+    // So no need to manually convert array into object
 
-exports.popMemberFromSortedSetWithLowestScore=function(key,length=1){
-    return new Promise(function(resolve,reject){
-        client.zpopmin(key,length,function(err,result){
-            if(err){
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while extracting in redis'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully Extract from redis set'
-            })
-        })
-    })
-}
-exports.getScoreOfMemberFromSortedSet=function(key,member){
-    return new Promise(function(resolve,reject){
-        client.zscore(key,member,function(err,result){
-            if(err){
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while getting member in redis'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully  get member score from redis set'
-            })
-        })
-    })
-}
+    // Optionally: Convert string scores to float
+    const parsed = {};
+    for (const [member, score] of Object.entries(result)) {
+      parsed[member] = parseFloat(score);
+    }
+
+    return {
+      error: false,
+      data: parsed
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message
+    };
+  }
+};
+
+
+
+// exports.getLengthFromRedisSortedSet=function(key){
+//     return new Promise(function(resolve,reject){
+//         client.zcard(key,function(err,result){
+//             if(err){
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while getting count in redis'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis set'
+//             })
+//         })
+//     })
+// }
+
+exports.getLengthFromRedisSortedSet = async function (key) {
+  try {
+    const result = await client.zCard(key); // ✅ Note: `zCard` is camelCase in Redis v4+
+    return {
+      error: false,
+      data: result,
+      message: 'Successfully got count from Redis sorted set'
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while getting count in Redis'
+    };
+  }
+};
+
+
+// exports.popMemberFromSortedSetWithLowestScore=function(key,length=1){
+//     return new Promise(function(resolve,reject){
+//         client.zpopmin(key,length,function(err,result){
+//             if(err){
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while extracting in redis'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully Extract from redis set'
+//             })
+//         })
+//     })
+// }
+
+exports.popMemberFromSortedSetWithLowestScore = async function (key, length = 1) {
+  try {
+    const result = await client.zPopMin(key, length); // ✅ Redis v4+ uses camelCase
+    return {
+      error: false,
+      data: result,
+      message: 'Successfully extracted from Redis sorted set'
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while extracting from Redis'
+    };
+  }
+};
+
+// exports.getScoreOfMemberFromSortedSet=function(key,member){
+//     return new Promise(function(resolve,reject){
+//         client.zscore(key,member,function(err,result){
+//             if(err){
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while getting member in redis'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully  get member score from redis set'
+//             })
+//         })
+//     })
+// }
+exports.getScoreOfMemberFromSortedSet = async function (key, member) {
+  try {
+    const result = await client.zScore(key, member); // ✅ Redis v4+ uses zScore
+    return {
+      error: false,
+      data: result,
+      message: 'Successfully got member score from Redis sorted set'
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while getting member score from Redis'
+    };
+  }
+};
+
 exports.incrementRedisKey = function (key, exp) {
 
     return new Promise(function (resolve, reject) {
