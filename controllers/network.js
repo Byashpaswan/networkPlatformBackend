@@ -17,6 +17,7 @@ const RolesModel=require('../db/Roles')
 // ===========Registering New User=======================
 //module for getting user enter values of form and storing in network database
 exports.RegisterNetwork=function(req, res){
+    console.log("req.body--",req.body);
     var name = req.body.first_name.trim() + " " + req.body.last_name.trim();
     const clientIp = requestIp.getClientIp(req); 
     var salt = bcrypt.genSaltSync(10);
@@ -42,6 +43,7 @@ exports.RegisterNetwork=function(req, res){
           query={name:'network_owner'}
           data={}
           RolesModel.isRoleExists(query,data).then(output=>{
+            console.log("rolesData--",output)
             if(output.length<=0){
               let response = Response.error();
               response.msg = "try after some time"
