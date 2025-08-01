@@ -405,7 +405,7 @@ exports.userLogin = async function (req, res) {
 
 		let handlingDomainData = await handelingDomainModel.findOneDomainData({ "domain" : domain });
 		// let networkFilter = { 'domain.dashboard': domain };
-		let networkFilter  = {  _id : mongooseObjectId(handlingDomainData['N_id'] ) } ; 
+		let networkFilter  = {  _id : mongooseObjectId('688cec59aa23cd007b883612') } ; 
 		
 		let networkProjection = { '_id': 1, 'company_name': 1, 'network_unique_id': 1, 'current_timezone': 1, 'network_publisher_setting_string': 1, 'domain': 1, 'nid': 1 };
 		let networkData = await NetworkModel.findOneDoc(networkFilter, networkProjection, {});
