@@ -409,6 +409,7 @@ exports.userLogin = async function (req, res) {
 		
 		let networkProjection = { '_id': 1, 'company_name': 1, 'network_unique_id': 1, 'current_timezone': 1, 'network_publisher_setting_string': 1, 'domain': 1, 'nid': 1 };
 		let networkData = await NetworkModel.findOneDoc(networkFilter, networkProjection, {});
+    console.log("networkData---",networkData)
 		if (!(networkData && networkData['_id'])) {
 			let response = Response.error();
 			response.error = 'domain does not exist';
@@ -419,6 +420,7 @@ exports.userLogin = async function (req, res) {
 		let userFilter = { 'email': req.body.userDetails.email, 'network': mongooseObjectId(networkData['_id']) };
 		let userProjection = { '_id': 1, 'password': 1, 'user_type': 1, 'first_name': 1, 'last_name': 1, 'roles.role': 1, 'roles.permissions.name': 1, 'user_category_label': 1, 'isPublisher': 1, 'isAdvertiser': 1, 'publisher': 1, 'advertiser': 1, 'parent_id': 1 };
 		let userData = await UserModel.getUser(userFilter, userProjection, {});
+    console.log("userData--",userData);
 		if (!(userData && userData['_id'])) {
 			let response = Response.error();
 			response.error = 'email does not exist';
@@ -526,6 +528,7 @@ exports.userLogin = async function (req, res) {
 		let saltKey=`userSalt:${networkData['_id']}:${userData['_id']}`
         // Get all members of the sorted set
         let SaltLength = (await redis.getLengthFromRedisSortedSet(saltKey)).data;
+        console.log("SaltLength----",SaltLength)
         // Check if the number of items exceeds the login limit
         if (+SaltLength>= loginLimit) {
 			let detetelength=(+SaltLength)-loginLimit+1;
