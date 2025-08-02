@@ -702,6 +702,37 @@ exports.getRedisHashDataByKeys = function (key, fieldsArray) {
 //     })
 // }
 
+exports.setDataInRedisSortedSet = async function (args, exp) {
+  try {
+    const [key, ...members] = args;
+
+    // Transform members to Redis v4 format: [{ score, value }, ...]
+    const formatted = [];
+    for (let i = 0; i < members.length; i += 2) {
+      formatted.push({
+        score: parseFloat(members[i + 1]),
+        value: members[i],
+      });
+    }
+
+    const result = await client.zAdd(key, formatted);
+
+    exp = exp || parseInt(process.env.REDIS_Exp) || 600;
+    await client.expire(key, exp);
+
+    return {
+      error: false,
+      data: result,
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+    };
+  }
+};
+
+
 exports.removeDataFromRedisSortedSet = function (key, member) {
     return new Promise(function (resolve, reject) {
         client.zrem(key, member, function (err, result) {
