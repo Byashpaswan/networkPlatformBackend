@@ -117,39 +117,73 @@ exports.setExpire = function (key, exp) {
     });
 }
 
-exports.setRedisData = function (key, value, exp) {
-    return new Promise(function (resolve, reject) {
-        if (value && typeof value == "object") {
-            value = JSON.stringify(value);
-        }else if(value == null || value == undefined){
-            return resolve({
-                error: true,
-                data: null,
-                msg: 'not assign falsy value.'
-            });
-        }
-        client.set(key, value, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while store value in redis'
-                });
-            }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, function (err) {
-                if (err) {
-                    debug("could not set expiry to key ", key)
-                }
-                resolve({
-                    error: false,
-                    data: result,
-                    message: 'successfully set in redis hash'
-                });
-            });
-        });
-    });
-}
+// exports.setRedisData = function (key, value, exp) {
+//     return new Promise(function (resolve, reject) {
+//         if (value && typeof value == "object") {
+//             value = JSON.stringify(value);
+//         }else if(value == null || value == undefined){
+//             return resolve({
+//                 error: true,
+//                 data: null,
+//                 msg: 'not assign falsy value.'
+//             });
+//         }
+//         client.set(key, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while store value in redis'
+//                 });
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp, function (err) {
+//                 if (err) {
+//                     debug("could not set expiry to key ", key)
+//                 }
+//                 resolve({
+//                     error: false,
+//                     data: result,
+//                     message: 'successfully set in redis hash'
+//                 });
+//             });
+//         });
+//     });
+// }
+exports.setRedisData = async function (key, value, exp) {
+  try {
+    if (value == null || value === undefined) {
+      return {
+        error: true,
+        data: null,
+        msg: 'Not assigning falsy value.',
+      };
+    }
+
+    if (typeof value === 'object') {
+      value = JSON.stringify(value);
+    }
+
+    await client.set(key, value);
+
+    exp = parseInt(exp) || parseInt(process.env.REDIS_Exp) || 600; // Default 10 minutes
+    await client.expire(key, exp);
+
+    return {
+      error: false,
+      data: value,
+      message: 'Successfully set in Redis',
+    };
+  } catch (err) {
+    console.error("❌ setRedisData error:", err.message);
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while storing value in Redis',
+    };
+  }
+};
+
 
 exports.delMultipleRedisData = function(...keys){
     return new Promise(function (resolve, reject){
@@ -704,18 +738,15 @@ exports.getRedisHashDataByKeys = function (key, fieldsArray) {
 
 exports.setDataInRedisSortedSet = async function (args, exp) {
   try {
-    const [key, ...members] = args;
+    const [key, score, member] = args;
 
-    // Transform members to Redis v4 format: [{ score, value }, ...]
-    const formatted = [];
-    for (let i = 0; i < members.length; i += 2) {
-      formatted.push({
-        score: parseFloat(members[i + 1]),
-        value: members[i],
-      });
+    // validate input
+    if (!key || !member || isNaN(score)) {
+      throw new Error("Invalid Redis zAdd args");
     }
 
-    const result = await client.zAdd(key, formatted);
+    const data = [{ score: parseFloat(score), value: member }];
+    const result = await client.zAdd(key, data);
 
     exp = exp || parseInt(process.env.REDIS_Exp) || 600;
     await client.expire(key, exp);
@@ -725,12 +756,14 @@ exports.setDataInRedisSortedSet = async function (args, exp) {
       data: result,
     };
   } catch (err) {
+    console.error("❌ Error in setDataInRedisSortedSet:", err.message);
     return {
       error: true,
       data: err.message,
     };
   }
 };
+
 
 
 exports.removeDataFromRedisSortedSet = function (key, member) {
