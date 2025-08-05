@@ -225,123 +225,254 @@ exports.delRedisData = function (key) {
 
 }
 
-exports.getRedisHashData = function (hash, key) {
-    //console.log('get offerkey ', offerKey);
-    return new Promise(function (resolve, reject) {
-        key = hash + ":" + key
-        client.get(key, function (err, result) {
-            if (err) {
-                return reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving  value from redis hash'
-                })
-            }
-            try {
-                result = JSON.parse(result);
-                return resolve({
-                    error: false,
-                    data: result,
-                    message: ' successfully get from redis key'
-                })
-            }
-            catch {
-                return reject({
-                    error: true,
-                    data: "",
-                    msg: 'Invalid data getting from redis'
-                })
-            }
+// exports.getRedisHashData = function (hash, key) {
+//     //console.log('get offerkey ', offerKey);
+//     return new Promise(function (resolve, reject) {
+//         key = hash + ":" + key
+//         client.get(key, function (err, result) {
+//             if (err) {
+//                 return reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving  value from redis hash'
+//                 })
+//             }
+//             try {
+//                 result = JSON.parse(result);
+//                 return resolve({
+//                     error: false,
+//                     data: result,
+//                     message: ' successfully get from redis key'
+//                 })
+//             }
+//             catch {
+//                 return reject({
+//                     error: true,
+//                     data: "",
+//                     msg: 'Invalid data getting from redis'
+//                 })
+//             }
 
-        })
-    })
+//         })
+//     })
 
-}
+// }
 
-exports.setRedisHashData = function (hash, key, value, exp) {
-    return new Promise(function (resolve, reject) {
-        value = JSON.stringify(value);
-        key = hash + ":" + key
-        client.set(key, value, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while store value in redis hash'
-                })
-            }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, function (err) {
-                if (err) {
-                    debug("could not set expiry to key ", key)
-                }
-                resolve({
-                    error: false,
-                    data: result,
-                    message: ' successfully set  in redis hash'
-                })
-            });
-        })
-    })
-}
+exports.getRedisHashData = async function (hash, key) {
+  const fullKey = `${hash}:${key}`;
+  try {
+    const result = await client.get(fullKey);
 
+    if (result === null) {
+      return {
+        error: true,
+        data: null,
+        msg: 'Key does not exist in Redis'
+      };
+    }
+
+    let parsed;
+    try {
+      parsed = JSON.parse(result);
+    } catch (e) {
+      // If not JSON, return as raw string
+      parsed = result;
+    }
+
+    return {
+      error: false,
+      data: parsed,
+      message: 'Successfully retrieved value from Redis'
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while retrieving value from Redis'
+    };
+  }
+};
+
+
+// exports.setRedisHashData = function (hash, key, value, exp) {
+//     return new Promise(function (resolve, reject) {
+//         value = JSON.stringify(value);
+//         key = hash + ":" + key
+//         client.set(key, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while store value in redis hash'
+//                 })
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp, function (err) {
+//                 if (err) {
+//                     debug("could not set expiry to key ", key)
+//                 }
+//                 resolve({
+//                     error: false,
+//                     data: result,
+//                     message: ' successfully set  in redis hash'
+//                 })
+//             });
+//         })
+//     })
+// }
+
+exports.setRedisHashData = async function (hash, key, value, exp) {
+  const fullKey = `${hash}:${key}`;
+
+  if (value == null || typeof value === 'undefined') {
+    return {
+      error: true,
+      data: null,
+      msg: 'Falsy or undefined value not allowed',
+    };
+  }
+
+  try {
+    const serialized = JSON.stringify(value);
+    const result = await client.set(fullKey, serialized);
+    
+    exp = exp || process.env.REDIS_Exp || 3600; // fallback to 1 hour
+    await client.expire(fullKey, exp);
+
+    return {
+      error: false,
+      data: result,
+      message: 'Successfully set value in Redis with expiry'
+    };
+  } catch (err) {
+    return {
+      error: true,
+      data: err.message,
+      msg: 'Error while storing value in Redis',
+    };
+  }
+};
+
+
+// exports.getHashData = function (key, field) {
+//     //console.log('get offerkey ', offerKey);
+//     return new Promise(function (resolve, reject) {
+//         client.hget(key, field, function (err, result) {
+//             if (err) {
+//                 return reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving  value from redis hash'
+//                 })
+//             }
+//             try {
+//                 return resolve({
+//                     error: false,
+//                     data: result,
+//                     message: 'successfully get from redis hash value'
+//                 })
+//             }
+//             catch {
+//                 return reject({
+//                     error: true,
+//                     data: "",
+//                     msg: 'Invalid data getting from redis'
+//                 })
+//             }
+
+//         })
+//     })
+
+// }
 exports.getHashData = function (key, field) {
-    //console.log('get offerkey ', offerKey);
-    return new Promise(function (resolve, reject) {
-        client.hget(key, field, function (err, result) {
+    return new Promise((resolve, reject) => {
+        client.hget(key, field, (err, result) => {
             if (err) {
                 return reject({
                     error: true,
                     data: err.message,
-                    msg: 'error while retrieving  value from redis hash'
-                })
-            }
-            try {
-                return resolve({
-                    error: false,
-                    data: result,
-                    message: 'successfully get from redis hash value'
-                })
-            }
-            catch {
-                return reject({
-                    error: true,
-                    data: "",
-                    msg: 'Invalid data getting from redis'
-                })
+                    msg: 'Error while retrieving value from Redis hash',
+                });
             }
 
-        })
-    })
+            return resolve({
+                error: false,
+                data: result,
+                message: 'Successfully retrieved from Redis hash',
+            });
+        });
+    });
+};
 
-}
+// exports.setHashData = function (key, field, value, exp) {
+//     return new Promise(function (resolve, reject) {
+//         if (value && typeof value == "object") {
+//             value = JSON.stringify(value);
+//         }
+//         client.hset(key, field, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while store value in redis hash'
+//                 })
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp, function (err) {
+//                 if (err) {
+//                     debug("could not set expiry to key ", key)
+//                 }
+//                 resolve({
+//                     error: false,
+//                     data: result,
+//                     message: ' successfully set in redis hash'
+//                 })
+//             });
+//         })
+//     })
+// }
+
+
 exports.setHashData = function (key, field, value, exp) {
-    return new Promise(function (resolve, reject) {
-        if (value && typeof value == "object") {
+    return new Promise((resolve, reject) => {
+        // Prevent storing null/undefined
+        if (value === null || value === undefined) {
+            return resolve({
+                error: true,
+                data: null,
+                msg: 'Cannot set null or undefined value in Redis hash',
+            });
+        }
+
+        if (typeof value === "object") {
             value = JSON.stringify(value);
         }
-        client.hset(key, field, value, function (err, result) {
+
+        client.hset(key, field, value, (err, result) => {
             if (err) {
-                reject({
+                return reject({
                     error: true,
                     data: err.message,
-                    msg: 'error while store value in redis hash'
-                })
+                    msg: 'Error while storing value in Redis hash',
+                });
             }
+
+            // Set expiry
             exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, function (err) {
+            client.expire(key, exp, (err) => {
                 if (err) {
-                    debug("could not set expiry to key ", key)
+                    console.warn("Could not set expiry on key:", key);
                 }
-                resolve({
+
+                return resolve({
                     error: false,
                     data: result,
-                    message: ' successfully set in redis hash'
-                })
+                    message: 'Successfully set in Redis hash',
+                });
             });
-        })
-    })
-}
+        });
+    });
+};
 
 exports.setRedisHashMultipleData = function (key, jsonData, exp) {
 
