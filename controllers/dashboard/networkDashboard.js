@@ -362,6 +362,7 @@ async function getAdvertisersAndPublishersCount(dateRange, networkId) {
 
 exports.getDashboardData = async (req, res) => {
     try {
+       console.log("re.body---dashoard",req.body)
         let dateRangeForAllStats = "today/yesterday";
         let dateRangeForStatistics = "today";
         let dateRangeForAdvertisers = "today";
@@ -393,10 +394,12 @@ exports.getDashboardData = async (req, res) => {
         }
 
         let networkId = mongooseObjectId(req.user.userDetail.network[0]);
+         console.log("networkId--",networkId)
         let output = {};
 
         if (req.body['getAllStats']) {
             output = await getAllStats(dateRangeForAllStats, networkId);
+          console.log("output getallStats--",output)
         }
         if (req.body['getOverallStat']) {
             output['overallStat'] = await getOverallStats(dateRangeForStatistics, networkId);
