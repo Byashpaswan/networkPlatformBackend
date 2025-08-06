@@ -323,6 +323,7 @@ exports.getRedisHashData = async function (hash, key) {
 
 exports.setRedisHashData = async function (hash, key, value, exp) {
   const fullKey = `${hash}:${key}`;
+   console.log("full keys--",fullkey);
 
   if (value == null || typeof value === 'undefined') {
     return {
@@ -334,6 +335,7 @@ exports.setRedisHashData = async function (hash, key, value, exp) {
 
   try {
     const serialized = JSON.stringify(value);
+     console.log("serialzed--",serialized);
     const result = await client.set(fullKey, serialized);
     
     exp = exp || process.env.REDIS_Exp || 3600; // fallback to 1 hour
