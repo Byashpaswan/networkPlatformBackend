@@ -60,62 +60,116 @@ runRedis();
 
 
 
-exports.getRedisKeys = function (pattern) {
-    return new Promise(function (resolve, reject) {
-        client.keys(pattern, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving keys from redis'
-                });
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get keys from redis'
-            });
-        });
-    });
-}
+// exports.getRedisKeys = function (pattern) {
+//     return new Promise(function (resolve, reject) {
+//         client.keys(pattern, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving keys from redis'
+//                 });
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get keys from redis'
+//             });
+//         });
+//     });
+// }
 
-exports.getRedisData = function (key) {
-    //debug('get offerkey ', offerKey);
-    return new Promise(function (resolve, reject) {
-        client.get(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving  value from redis'
-                })
-            }
+exports.getRedisKeys = async function (pattern) {
+    try {
+        const result = await client.keys(pattern);
+        return {
+            error: false,
+            data: result,
+            message: 'successfully got keys from redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while retrieving keys from redis'
+        };
+    }
+};
 
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis'
-            })
+// exports.getRedisData = function (key) {
+//     //debug('get offerkey ', offerKey);
+//     return new Promise(function (resolve, reject) {
+//         client.get(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving  value from redis'
+//                 })
+//             }
 
-        })
-    })
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis'
+//             })
 
-}
+//         })
+//     })
 
-exports.setExpire = function (key, exp) {
-    return new Promise(function (resolve, reject) {
-        client.expire(key, exp, function (err) {
-            if (err) {
-                debug("could not set expiry to key ", key)
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: 'successfully set expire in redis key'
-            });
-        });
-    });
-}
+// }
+
+exports.getRedisData = async function (key) {
+    try {
+        const result = await client.get(key);
+        return {
+            error: false,
+            data: result,
+            message: 'successfully got value from redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while retrieving value from redis'
+        };
+    }
+};
+
+
+// exports.setExpire = function (key, exp) {
+//     return new Promise(function (resolve, reject) {
+//         client.expire(key, exp, function (err) {
+//             if (err) {
+//                 debug("could not set expiry to key ", key)
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: 'successfully set expire in redis key'
+//             });
+//         });
+//     });
+// }
+
+
+exports.setExpire = async function (key, exp) {
+    try {
+        await client.expire(key, exp);
+        return {
+            error: false,
+            data: null,
+            message: 'successfully set expire in redis key'
+        };
+    } catch (err) {
+        debug("could not set expiry to key", key, err);
+        return {
+            error: true,
+            data: err.message,
+            message: 'error while setting expire in redis key'
+        };
+    }
+};
 
 // exports.setRedisData = function (key, value, exp) {
 //     return new Promise(function (resolve, reject) {
@@ -185,45 +239,80 @@ exports.setRedisData = async function (key, value, exp) {
 };
 
 
-exports.delMultipleRedisData = function(...keys){
-    return new Promise(function (resolve, reject){
-        client.del(keys, function (err, result){
-            if(err){
-                reject({
-                    error : true,
-                    data : err.message,
-                    msg : 'error while deleting keys in redis'
-                });
-            }
-            resolve({
-                error : false,
-                data : result,
-                message : 'keys in redis deleted successfully'
-            })
-        })
-    })
+// exports.delMultipleRedisData = function(...keys){
+//     return new Promise(function (resolve, reject){
+//         client.del(keys, function (err, result){
+//             if(err){
+//                 reject({
+//                     error : true,
+//                     data : err.message,
+//                     msg : 'error while deleting keys in redis'
+//                 });
+//             }
+//             resolve({
+//                 error : false,
+//                 data : result,
+//                 message : 'keys in redis deleted successfully'
+//             })
+//         })
+//     })
+// }
+exports.delMultipleRedisData = async function (...keys) {
+    try {
+        const result = await client.del(...keys); // deletes multiple keys
+        return {
+            error: false,
+            data: result, // number of keys deleted
+            message: 'keys in redis deleted successfully'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while deleting keys in redis'
+        };
+    }
 }
 
-exports.delRedisData = function (key) {
-    return new Promise(function (resolve, reject) {
-        client.del(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while deleting key in redis'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: 'key in redis deleted successfully'
-            })
-        })
-    })
+
+// exports.delRedisData = function (key) {
+//     return new Promise(function (resolve, reject) {
+//         client.del(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while deleting key in redis'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: 'key in redis deleted successfully'
+//             })
+//         })
+//     })
 
 
-}
+// }
+
+exports.delRedisData = async function (key) {
+    try {
+        const result = await client.del(key); // deletes the key
+        return {
+            error: false,
+            data: result, // 1 if deleted, 0 if key didn't exist
+            message: 'key in redis deleted successfully'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while deleting key in redis'
+        };
+    }
+};
+
 
 // exports.getRedisHashData = function (hash, key) {
 //     //console.log('get offerkey ', offerKey);
@@ -259,38 +348,37 @@ exports.delRedisData = function (key) {
 // }
 
 exports.getRedisHashData = async function (hash, key) {
-  const fullKey = `${hash}:${key}`;
-  try {
-    const result = await client.get(fullKey);
-
-    if (result === null) {
-      return {
-        error: true,
-        data: null,
-        msg: 'Key does not exist in Redis'
-      };
-    }
-
-    let parsed;
+    const fullKey = `${hash}:${key}`;
     try {
-      parsed = JSON.parse(result);
-    } catch (e) {
-      // If not JSON, return as raw string
-      parsed = result;
-    }
+        const result = await client.get(fullKey);
 
-    return {
-      error: false,
-      data: parsed,
-      message: 'Successfully retrieved value from Redis'
-    };
-  } catch (err) {
-    return {
-      error: true,
-      data: err.message,
-      msg: 'Error while retrieving value from Redis'
-    };
-  }
+        if (!result) {
+            return {
+                error: true,
+                data: null,
+                msg: 'Key does not exist in Redis'
+            };
+        }
+
+        let parsed = result;
+        try {
+            parsed = JSON.parse(result);
+        } catch {
+            // Keep as string if not valid JSON
+        }
+
+        return {
+            error: false,
+            data: parsed,
+            message: 'Successfully retrieved value from Redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving value from Redis'
+        };
+    }
 };
 
 
@@ -386,24 +474,22 @@ exports.setRedisHashData = async function (hash, key, value, exp) {
 //     })
 
 // }
-exports.getHashData = function (key, field) {
-    return new Promise((resolve, reject) => {
-        client.hget(key, field, (err, result) => {
-            if (err) {
-                return reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'Error while retrieving value from Redis hash',
-                });
-            }
+exports.getHashData = async function (key, field) {
+    try {
+        const result = await client.hGet(key, field);
 
-            return resolve({
-                error: false,
-                data: result,
-                message: 'Successfully retrieved from Redis hash',
-            });
-        });
-    });
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully got value from Redis hash'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving value from Redis hash'
+        };
+    }
 };
 
 // exports.setHashData = function (key, field, value, exp) {
@@ -435,113 +521,167 @@ exports.getHashData = function (key, field) {
 // }
 
 
-exports.setHashData = function (key, field, value, exp) {
-    return new Promise((resolve, reject) => {
-        // Prevent storing null/undefined
-        if (value === null || value === undefined) {
-            return resolve({
-                error: true,
-                data: null,
-                msg: 'Cannot set null or undefined value in Redis hash',
-            });
-        }
-
-        if (typeof value === "object") {
+exports.setHashData = async function (key, field, value, exp) {
+    try {
+        // Convert objects to JSON strings
+        if (value && typeof value === "object") {
             value = JSON.stringify(value);
         }
 
-        client.hset(key, field, value, (err, result) => {
-            if (err) {
-                return reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'Error while storing value in Redis hash',
-                });
-            }
+        // Store value in Redis hash
+        const result = await client.hSet(key, field, value);
 
-            // Set expiry
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, (err) => {
-                if (err) {
-                    console.warn("Could not set expiry on key:", key);
-                }
-
-                return resolve({
-                    error: false,
-                    data: result,
-                    message: 'Successfully set in Redis hash',
-                });
-            });
-        });
-    });
-};
-
-exports.setRedisHashMultipleData = function (key, jsonData, exp) {
-
-    return new Promise(function (resolve, reject) {
-
-        // Format json value into string then convert into json again
-        if (typeof (jsonData) === 'object') {
-            jsonData = formatNestedObjectIntoString(jsonData)
+        // Set expiry (default from env if not provided)
+        exp = exp || process.env.REDIS_Exp;
+        if (exp) {
+            await client.expire(key, parseInt(exp, 10));
         }
 
-        client.hmset(key, jsonData, function (err, result) {
-            if (err) {
-                reject({
-                    err: true,
-                    data: err.message
-                })
-            }
-            if (exp != -1) {
-                exp = exp || process.env.REDIS_Exp;
-                client.expire(key, exp)
-            }
-            resolve({
-                err: false,
-                data: result
-            })
-        })
-    })
-}
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully set in Redis hash'
+        };
 
-exports.getRedisHashMultipleData = function (key) {
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while storing value in Redis hash'
+        };
+    }
+};
 
-    return new Promise(function (resolve, reject) {
 
-        client.hgetall(key, function (err, result) {
-            if (err) {
-                reject({
-                    err: true,
-                    data: err.message
-                })
-            }
-            resolve({
-                err: false,
-                data: result
-            })
-        })
-    })
-}
+// exports.setRedisHashMultipleData = function (key, jsonData, exp) {
 
-exports.delRedisHashData = function (hash, key) {
-    return new Promise(function (resolve, reject) {
-        key = hash + ":" + key
-        client.del(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while deleting hash value from redis '
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' hash deleted'
-            })
-        })
-    })
-}
+//     return new Promise(function (resolve, reject) {
+
+//         // Format json value into string then convert into json again
+//         if (typeof (jsonData) === 'object') {
+//             jsonData = formatNestedObjectIntoString(jsonData)
+//         }
+
+//         client.hmset(key, jsonData, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     err: true,
+//                     data: err.message
+//                 })
+//             }
+//             if (exp != -1) {
+//                 exp = exp || process.env.REDIS_Exp;
+//                 client.expire(key, exp)
+//             }
+//             resolve({
+//                 err: false,
+//                 data: result
+//             })
+//         })
+//     })
+// }
+
+exports.setRedisHashMultipleData = async function (key, jsonData, exp) {
+    try {
+        // Convert nested objects to strings if needed
+        if (typeof jsonData === 'object') {
+            jsonData = formatNestedObjectIntoString(jsonData);
+        }
+
+        // In redis v4+, hSet can accept a plain object
+        await client.hSet(key, jsonData);
+
+        // Set expiry if required
+        if (exp !== -1) {
+            exp = exp || process.env.REDIS_Exp;
+            await client.expire(key, exp);
+        }
+
+        return {
+            err: false,
+            data: 'Successfully set multiple hash fields in Redis'
+        };
+
+    } catch (error) {
+        return {
+            err: true,
+            data: error.message
+        };
+    }
+};
+
+
+// exports.getRedisHashMultipleData = function (key) {
+
+//     return new Promise(function (resolve, reject) {
+
+//         client.hgetall(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     err: true,
+//                     data: err.message
+//                 })
+//             }
+//             resolve({
+//                 err: false,
+//                 data: result
+//             })
+//         })
+//     })
+// }
+exports.getRedisHashMultipleData = async function (key) {
+    try {
+        const result = await client.hGetAll(key);
+        return {
+            err: false,
+            data: result
+        };
+    } catch (err) {
+        return {
+            err: true,
+            data: err.message
+        };
+    }
+};
+
+// exports.delRedisHashData = function (hash, key) {
+//     return new Promise(function (resolve, reject) {
+//         key = hash + ":" + key
+//         client.del(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while deleting hash value from redis '
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' hash deleted'
+//             })
+//         })
+//     })
+// }
+exports.delRedisHashData = async function (hash, key) {
+    try {
+        const redisKey = `${hash}:${key}`;
+        const result = await client.del(redisKey);
+
+        return {
+            error: false,
+            data: result,
+            message: 'hash deleted'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while deleting hash value from redis'
+        };
+    }
+};
+
 // exports.delRedisHash=function(hash){
 //     return new Promise(function(resolve,reject){
 //         client.del(hash,function (err, result) {
@@ -561,291 +701,571 @@ exports.delRedisHashData = function (hash, key) {
 //     })
 // }
 
-exports.getRedisSetData = function (key) {
-    return new Promise(function (resolve, reject) {
-        client.smembers(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving value from redis set'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis set'
-            })
-        })
-    })
-}
-
-exports.checkMemberInRedisSet = function (key, member) {
-    return new Promise(function (resolve, reject) {
-        client.sismember(key, member, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving value from redis set'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis set'
-            })
-        })
-    })
-}
-
-exports.setMultipleKeyWithExpire = function (arrOfKeyValObj, exp) {
-    return new Promise(function (resolve, reject) {
-
-        exp = exp || process.env.REDIS_Exp;
-        const commands = arrOfKeyValObj.map((obj) => ['set', obj.key, obj.value, 'ex', exp]);
-        client
-            .multi(commands)
-            .exec(function (err, result) {
-                if (err) {
-                    reject({
-                        error: true,
-                        data: err.message,
-                        msg: 'error while retrieving value from redis set'
-                    })
-                }
-                else {
-                    resolve({
-                        error: false,
-                        data: result,
-                        message: ' successfully get from redis set'
-                    })
-                }
-            });
-    })
-}
-
-exports.getMultipleKeys = function (keysPattern) {
-    return new Promise((resolve, reject) => {
-      client.keys(keysPattern, (err, result) => {
-        if (err) {
-          reject({
+// exports.getRedisSetData = function (key) {
+//     return new Promise(function (resolve, reject) {
+//         client.smembers(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving value from redis set'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis set'
+//             })
+//         })
+//     })
+// }
+exports.getRedisSetData = async function (key) {
+    try {
+        const result = await client.sMembers(key); // v4+ API
+        return {
+            error: false,
+            data: result,
+            message: 'successfully retrieved from redis set'
+        };
+    } catch (err) {
+        return {
             error: true,
             data: err.message,
-            msg: 'Error while retrieving keys from keyPattern'
-          });
-        } else {
-          resolve({
+            msg: 'error while retrieving value from redis set'
+        };
+    }
+};
+
+
+// exports.checkMemberInRedisSet = function (key, member) {
+//     return new Promise(function (resolve, reject) {
+//         client.sismember(key, member, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving value from redis set'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis set'
+//             })
+//         })
+//     })
+// }
+exports.checkMemberInRedisSet = async function (key, member) {
+    try {
+        const result = await client.sIsMember(key, member); // v4+ API
+        return {
+            error: false,
+            data: result,
+            message: 'successfully checked member in redis set'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while checking member in redis set'
+        };
+    }
+};
+
+// exports.setMultipleKeyWithExpire = function (arrOfKeyValObj, exp) {
+//     return new Promise(function (resolve, reject) {
+
+//         exp = exp || process.env.REDIS_Exp;
+//         const commands = arrOfKeyValObj.map((obj) => ['set', obj.key, obj.value, 'ex', exp]);
+//         client
+//             .multi(commands)
+//             .exec(function (err, result) {
+//                 if (err) {
+//                     reject({
+//                         error: true,
+//                         data: err.message,
+//                         msg: 'error while retrieving value from redis set'
+//                     })
+//                 }
+//                 else {
+//                     resolve({
+//                         error: false,
+//                         data: result,
+//                         message: ' successfully get from redis set'
+//                     })
+//                 }
+//             });
+//     })
+// }
+exports.setMultipleKeyWithExpire = async function (arrOfKeyValObj, exp) {
+    try {
+        exp = exp || process.env.REDIS_Exp;
+
+        // Convert key-value array into multi commands
+        const commands = arrOfKeyValObj.map(obj => [
+            'set', obj.key, obj.value, 'EX', exp
+        ]);
+
+        const result = await client.multi(commands).exec();
+
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully set multiple keys with expiry'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while setting multiple keys with expiry'
+        };
+    }
+};
+
+// exports.getMultipleKeys = function (keysPattern) {
+//     return new Promise((resolve, reject) => {
+//       client.keys(keysPattern, (err, result) => {
+//         if (err) {
+//           reject({
+//             error: true,
+//             data: err.message,
+//             msg: 'Error while retrieving keys from keyPattern'
+//           });
+//         } else {
+//           resolve({
+//             error: false,
+//             data: result,
+//             message: 'Successfully retrieved keys from keyPattern'
+//           });
+//         }
+//       });
+//     });
+// }
+  exports.getMultipleKeys = async function (keysPattern) {
+    try {
+        const result = await client.keys(keysPattern);
+        return {
             error: false,
             data: result,
             message: 'Successfully retrieved keys from keyPattern'
-          });
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving keys from keyPattern'
+        };
+    }
+};
+
+// exports.getMultipleRedisData = function (keys) {
+//     return new Promise(function (resolve, reject) {
+//         const commands = keys.map((key) => ['get', key]);
+//         client
+//             .multi(commands)
+//             .exec(function (err, result) {
+//                 if (err) {
+//                     reject({
+//                         error: true,
+//                         data: err.message,
+//                         msg: 'error while retrieving value from redis'
+//                     })
+//                 }
+//                 else {
+//                     resolve({
+//                         error: false,
+//                         data: result,
+//                         message: 'successfully get from redis'
+//                     })
+//                 }
+//             });
+//     })
+// }
+
+exports.getMultipleRedisData = async function (keys) {
+    try {
+        const pipeline = client.multi();
+
+        // Queue all GET commands
+        keys.forEach((key) => {
+            pipeline.get(key);
+        });
+
+        // Execute all queued commands
+        const result = await pipeline.exec();
+
+        return {
+            error: false,
+            data: result.map(item => item[1]), // item = [error, value]
+            message: 'Successfully retrieved data from Redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving value from Redis'
+        };
+    }
+};
+
+// exports.getMultipleSetData = function (keys) {
+//     return new Promise(function (resolve, reject) {
+//         const commands = keys.map((key) => ['smembers', key]);
+//         client
+//             .multi(commands)
+//             .exec(function (err, result) {
+//                 if (err) {
+//                     reject({
+//                         error: true,
+//                         data: err.message,
+//                         msg: 'error while retrieving value from redis set'
+//                     })
+//                 }
+//                 else {
+//                     resolve({
+//                         error: false,
+//                         data: result,
+//                         message: ' successfully get from redis set'
+//                     })
+//                 }
+//             });
+//     })
+// }
+exports.getMultipleSetData = async function (keys) {
+    try {
+        const results = await Promise.all(
+            keys.map(async (key) => {
+                const members = await client.sMembers(key); // Redis v4 method
+                return { key, members };
+            })
+        );
+
+        return {
+            error: false,
+            data: results,
+            message: 'Successfully retrieved data from Redis sets'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving value from Redis set'
+        };
+    }
+};
+
+
+// exports.getMultipleSortedSetData = function (keys, startIndex, endIndex) {
+//     return new Promise(function (resolve, reject) {
+//         const commands = keys.map((key) => ['zrange', key, startIndex, endIndex, 'WITHSCORES']);
+//         client
+//             .multi(commands)
+//             .exec(function (err, result) {
+//                 if (err) {
+//                     reject({
+//                         error: true,
+//                         data: err.message,
+//                         msg: 'error while retrieving value from redis sorted set'
+//                     })
+//                 }
+//                 else {
+//                     resolve({
+//                         error: false,
+//                         data: result,
+//                         message: ' successfully get from redis sorted set'
+//                     })
+//                 }
+//             });
+//     })
+// }
+exports.getMultipleSortedSetData = async function (keys, startIndex, endIndex) {
+    try {
+        const commands = keys.map((key) => [
+            'zRange', // new camelCase command
+            key,
+            startIndex,
+            endIndex,
+            { WITHSCORES: true }
+        ]);
+
+        const result = await client.multi(commands).exec();
+
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully retrieved from Redis sorted set'
+        };
+
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving value from Redis sorted set'
+        };
+    }
+};
+
+// exports.getRedisMgetData = function (key) {
+//     return new Promise(function (resolve, reject) {
+//         client.mget(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving value from redis set'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis set'
+//             })
+//         })
+//     })
+// }
+exports.getRedisMgetData = function (keys) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const result = await client.mGet(keys); // v4+ uses camelCase: mGet
+            resolve({
+                error: false,
+                data: result,
+                message: 'successfully got from redis set'
+            });
+        } catch (err) {
+            reject({
+                error: true,
+                data: err.message,
+                msg: 'error while retrieving value from redis set'
+            });
         }
-      });
     });
-}
-  
-exports.getMultipleRedisData = function (keys) {
-    return new Promise(function (resolve, reject) {
-        const commands = keys.map((key) => ['get', key]);
-        client
-            .multi(commands)
-            .exec(function (err, result) {
-                if (err) {
-                    reject({
-                        error: true,
-                        data: err.message,
-                        msg: 'error while retrieving value from redis'
-                    })
-                }
-                else {
-                    resolve({
-                        error: false,
-                        data: result,
-                        message: 'successfully get from redis'
-                    })
-                }
-            });
-    })
-}
+};
 
-exports.getMultipleSetData = function (keys) {
-    return new Promise(function (resolve, reject) {
-        const commands = keys.map((key) => ['smembers', key]);
-        client
-            .multi(commands)
-            .exec(function (err, result) {
-                if (err) {
-                    reject({
-                        error: true,
-                        data: err.message,
-                        msg: 'error while retrieving value from redis set'
-                    })
-                }
-                else {
-                    resolve({
-                        error: false,
-                        data: result,
-                        message: ' successfully get from redis set'
-                    })
-                }
-            });
-    })
-}
 
-exports.getMultipleSortedSetData = function (keys, startIndex, endIndex) {
-    return new Promise(function (resolve, reject) {
-        const commands = keys.map((key) => ['zrange', key, startIndex, endIndex, 'WITHSCORES']);
-        client
-            .multi(commands)
-            .exec(function (err, result) {
-                if (err) {
-                    reject({
-                        error: true,
-                        data: err.message,
-                        msg: 'error while retrieving value from redis sorted set'
-                    })
-                }
-                else {
-                    resolve({
-                        error: false,
-                        data: result,
-                        message: ' successfully get from redis sorted set'
-                    })
-                }
-            });
-    })
-}
+// exports.removeRedisSetMember = function (key, value) {
+//     return new Promise(function (resolve, reject) {
+//         client.srem(key, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while removing value from redis set'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully removed value from redis set'
+//             })
+//         })
+//     })
+// }
+exports.removeRedisSetMember = async function (key, value) {
+    try {
+        const result = await client.sRem(key, value); // Note: sRem is camelCase in v4+
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully removed value from Redis set'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while removing value from Redis set'
+        };
+    }
+};
 
-exports.getRedisMgetData = function (key) {
-    return new Promise(function (resolve, reject) {
-        client.mget(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving value from redis set'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis set'
-            })
-        })
-    })
-}
 
-exports.removeRedisSetMember = function (key, value) {
-    return new Promise(function (resolve, reject) {
-        client.srem(key, value, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while removing value from redis set'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully removed value from redis set'
-            })
-        })
-    })
-}
+// exports.getRedisSetLength = function(key, exp){
+//     return new Promise(function (resolve, reject) {
+//         client.scard(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while store value in redis set'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully set in redis set'
+//             })
 
-exports.getRedisSetLength = function(key, exp){
-    return new Promise(function (resolve, reject) {
-        client.scard(key, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while store value in redis set'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully set in redis set'
-            })
+//             // exp = exp || process.env.REDIS_Exp;
+//             // client.expire(key, exp, function (err, result) {
+//             //     if (err) {
+//             //         // debug( "could not set expiry to set ",key)
+//             //     }
+//             //     resolve({
+//             //         error: false,
+//             //         data: result,
+//             //         message: ' successfully set in redis set'
+//             //     })
+//             // })
+//         })
+//     })
+// }
+exports.getRedisSetLength = async function (key, exp) {
+    try {
+        const result = await client.sCard(key);
+        if (exp) {
+            await client.expire(key, exp); // set TTL if provided
+        }
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully retrieved Redis set length'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving Redis set length'
+        };
+    }
+};
 
-            // exp = exp || process.env.REDIS_Exp;
-            // client.expire(key, exp, function (err, result) {
-            //     if (err) {
-            //         // debug( "could not set expiry to set ",key)
-            //     }
-            //     resolve({
-            //         error: false,
-            //         data: result,
-            //         message: ' successfully set in redis set'
-            //     })
-            // })
-        })
-    })
-}
-
+// exports.setRedisSetData = function (key, value, exp) {
+//     return new Promise(function (resolve, reject) {
+//         client.sadd(key, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while store value in redis set'
+//                 })
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp, function (err, result) {
+//                 if (err) {
+//                     // debug( "could not set expiry to set ",key)
+//                 }
+//                 resolve({
+//                     error: false,
+//                     data: result,
+//                     message: ' successfully set in redis set'
+//                 })
+//             })
+//         })
+//     })
+// }
 exports.setRedisSetData = function (key, value, exp) {
-    return new Promise(function (resolve, reject) {
-        client.sadd(key, value, function (err, result) {
+    return new Promise((resolve, reject) => {
+        client.sadd(key, value, (err, saddResult) => {
             if (err) {
-                reject({
+                return reject({
                     error: true,
                     data: err.message,
-                    msg: 'error while store value in redis set'
-                })
+                    msg: 'Error while storing value in Redis set'
+                });
             }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, function (err, result) {
-                if (err) {
-                    // debug( "could not set expiry to set ",key)
+
+            exp = Number(exp || process.env.REDIS_Exp || 3600); // default 1h
+            client.expire(key, exp, (expireErr) => {
+                if (expireErr) {
+                    return reject({
+                        error: true,
+                        data: expireErr.message,
+                        msg: 'Error while setting expiry for Redis set'
+                    });
                 }
+
                 resolve({
                     error: false,
-                    data: result,
-                    message: ' successfully set in redis set'
-                })
-            })
-        })
-    })
-}
+                    data: saddResult, // number of items actually added
+                    message: `Successfully added value to Redis set and set expiry to ${exp}s`
+                });
+            });
+        });
+    });
+};
 
-exports.getRedisSetsDataByUnion = function (keys) {
-    return new Promise(function (resolve, reject) {
-        client.sunion(keys, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving value from redis sets by union'
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get from redis sets by union'
-            })
-        })
-    })
-}
 
+// exports.getRedisSetsDataByUnion = function (keys) {
+//     return new Promise(function (resolve, reject) {
+//         client.sunion(keys, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving value from redis sets by union'
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get from redis sets by union'
+//             })
+//         })
+//     })
+// }
+exports.getRedisSetsDataByUnion = async function (keys) {
+    try {
+        // Ensure keys is an array
+        if (!Array.isArray(keys)) {
+            throw new Error('keys must be an array');
+        }
+
+        const result = await client.sUnion(keys); // Redis v4+ method name is camelCase
+        return {
+            error: false,
+            data: result,
+            message: 'successfully got data from Redis sets by union'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'error while retrieving value from Redis sets by union'
+        };
+    }
+};
+
+
+// exports.getRedisHashDataByKeys = function (key, fieldsArray) {
+//     return new Promise(function (resolve, reject) {
+//         client.hmget(key, fieldsArray, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//             })
+//         })
+//     })
+// }
 exports.getRedisHashDataByKeys = function (key, fieldsArray) {
     return new Promise(function (resolve, reject) {
+        if (!Array.isArray(fieldsArray) || fieldsArray.length === 0) {
+            return reject({
+                error: true,
+                data: 'fieldsArray must be a non-empty array',
+            });
+        }
+
         client.hmget(key, fieldsArray, function (err, result) {
             if (err) {
-                reject({
+                return reject({
                     error: true,
                     data: err.message,
-                })
+                });
             }
+
             resolve({
                 error: false,
                 data: result,
-            })
-        })
-    })
-}
+            });
+        });
+    });
+};
 
 // exports.setDataInRedisSortedSet = function (args, exp) {
 //     return new Promise(function (resolve, reject) {
@@ -899,44 +1319,81 @@ exports.setDataInRedisSortedSet = async function (args, exp) {
 
 
 
-exports.removeDataFromRedisSortedSet = function (key, member) {
-    return new Promise(function (resolve, reject) {
-        client.zrem(key, member, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                })
-            }
-            resolve({
-                error: false,
-                data: result,
-            })
-        })
-    })
-}
-exports.getDataFromRedisSortedSet = function (args) {
-    return new Promise(function (resolve, reject) {
-        client.zrange(args, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                })
-            }
-            let result2 = {};
-            if (result && result.length) {
-                for (let i = 0; i < result.length; i += 2) {
-                    result2[result[i]] = parseFloat(result[i + 1])
-                }
-            }
-            resolve({
-                error: false,
-                data: result2,
-            })
-        })
-    })
-}
+// exports.removeDataFromRedisSortedSet = function (key, member) {
+//     return new Promise(function (resolve, reject) {
+//         client.zrem(key, member, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                 })
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//             })
+//         })
+//     })
+// }
+exports.removeDataFromRedisSortedSet = async function (key, member) {
+    try {
+        const result = await client.zRem(key, member); // zRem for sorted set remove
+        return {
+            error: false,
+            data: result,
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+        };
+    }
+};
+
+// exports.getDataFromRedisSortedSet = function (args) {
+//     return new Promise(function (resolve, reject) {
+//         client.zrange(args, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                 })
+//             }
+//             let result2 = {};
+//             if (result && result.length) {
+//                 for (let i = 0; i < result.length; i += 2) {
+//                     result2[result[i]] = parseFloat(result[i + 1])
+//                 }
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result2,
+//             })
+//         })
+//     })
+// }
+exports.getDataFromRedisSortedSet = async function (key) {
+    try {
+        // Fetch with scores
+        const result = await client.zRangeWithScores(key, 0, -1);
+
+        // Convert to { member: score } format
+        const resultObj = {};
+        for (const { value, score } of result) {
+            resultObj[value] = parseFloat(score);
+        }
+
+        return {
+            error: false,
+            data: resultObj,
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+        };
+    }
+};
 
 // exports.getAllDataFromRedisSortedSet = function (key) {
 //     let args=[key,0,-1,'WITHSCORES']
@@ -1096,72 +1553,141 @@ exports.getScoreOfMemberFromSortedSet = async function (key, member) {
   }
 };
 
-exports.incrementRedisKey = function (key, exp) {
+// exports.incrementRedisKey = function (key, exp) {
 
-    return new Promise(function (resolve, reject) {
+//     return new Promise(function (resolve, reject) {
 
-        client.incr(key, function (err, result) {
-            if (err) {
-                reject({
-                    err: true,
-                    data: err.message
-                })
-            }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp)
-            resolve({
-                err: false,
-                data: result
-            })
-        })
-    })
-}
+//         client.incr(key, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     err: true,
+//                     data: err.message
+//                 })
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp)
+//             resolve({
+//                 err: false,
+//                 data: result
+//             })
+//         })
+//     })
+// }
+exports.incrementRedisKey = async function (key, exp) {
+    try {
+        const result = await client.incr(key);
+        exp = exp || process.env.REDIS_Exp;
 
-exports.incrbyRedisData = function (key, value, exp) {
-    return new Promise(function (resolve, reject) {
-        client.incrby(key, value, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while incrementing value in redis!'
-                });
-            }
-            exp = exp || process.env.REDIS_Exp;
-            client.expire(key, exp, function (err) {
-                if (err) {
-                    debug("could not set expiry to key ", key)
-                }
-                resolve({
-                    error: false,
-                    data: result,
-                    message: 'successfully set in redis hash'
-                });
-            });
-        });
-    });
-}
-exports.setRedisQueueData = function (key, value) {
-    return new Promise(function (resolve, reject) {
-        client.rpush(key, value, function (err, result) {
-            if (err) {
-                reject();
-            }
-            resolve(result);
-        })
-    });
-}
+        if (exp) {
+            await client.expire(key, exp);
+        }
 
-exports.getRedisQueueData = function (key) {
-    return new Promise(function (resolve, reject) {
-        client.lpop(key, function (err, result) {
-            if (err) {
-                reject();
-            }
-            resolve(result);
-        });
-    });
-}
+        return {
+            err: false,
+            data: result
+        };
+    } catch (error) {
+        return {
+            err: true,
+            data: error.message
+        };
+    }
+};
+
+
+// exports.incrbyRedisData = function (key, value, exp) {
+//     return new Promise(function (resolve, reject) {
+//         client.incrby(key, value, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while incrementing value in redis!'
+//                 });
+//             }
+//             exp = exp || process.env.REDIS_Exp;
+//             client.expire(key, exp, function (err) {
+//                 if (err) {
+//                     debug("could not set expiry to key ", key)
+//                 }
+//                 resolve({
+//                     error: false,
+//                     data: result,
+//                     message: 'successfully set in redis hash'
+//                 });
+//             });
+//         });
+//     });
+// }
+exports.incrbyRedisData = async function (key, value, exp) {
+    try {
+        const result = await client.incrBy(key, value);
+
+        exp = exp || process.env.REDIS_Exp;
+        try {
+            await client.expire(key, exp);
+        } catch (expireErr) {
+            console.error(`Could not set expiry for key ${key}:`, expireErr);
+        }
+
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully incremented value and set expiry in Redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while incrementing value in Redis!'
+        };
+    }
+};
+
+// exports.setRedisQueueData = function (key, value) {
+//     return new Promise(function (resolve, reject) {
+//         client.rpush(key, value, function (err, result) {
+//             if (err) {
+//                 reject();
+//             }
+//             resolve(result);
+//         })
+//     });
+// }
+exports.setRedisQueueData = async function (key, value) {
+    try {
+        const result = await client.rPush(key, value); // push to right end of list
+        return result; // returns new length of list
+    } catch (err) {
+        throw {
+            error: true,
+            data: err.message
+        };
+    }
+};
+
+// exports.getRedisQueueData = function (key) {
+//     return new Promise(function (resolve, reject) {
+//         client.lpop(key, function (err, result) {
+//             if (err) {
+//                 reject();
+//             }
+//             resolve(result);
+//         });
+//     });
+// }
+exports.getRedisQueueData = async function (key) {
+    try {
+        const result = await client.lPop(key); // pops from left end of list
+        return result; // will be null if list is empty
+    } catch (err) {
+        throw {
+            error: true,
+            data: err.message
+        };
+    }
+};
+
 
 const formatNestedObjectIntoString = (jsonData) => {
 
@@ -1185,22 +1711,39 @@ exports.testRedis = async () => {
     }
 }
 
-exports.getHashKeys = function (keys) {
-    return new Promise(function (resolve, reject) {
-        client.hkeys(keys, function (err, result) {
-            if (err) {
-                reject({
-                    error: true,
-                    data: err.message,
-                    msg: 'error while retrieving keys from redis'
-                });
-            }
-            resolve({
-                error: false,
-                data: result,
-                message: ' successfully get keys from redis'
-            });
-        });
-    });
-}
+// exports.getHashKeys = function (keys) {
+//     return new Promise(function (resolve, reject) {
+//         client.hkeys(keys, function (err, result) {
+//             if (err) {
+//                 reject({
+//                     error: true,
+//                     data: err.message,
+//                     msg: 'error while retrieving keys from redis'
+//                 });
+//             }
+//             resolve({
+//                 error: false,
+//                 data: result,
+//                 message: ' successfully get keys from redis'
+//             });
+//         });
+//     });
+// }
+exports.getHashKeys = async function (key) {
+    try {
+        const result = await client.hKeys(key); // hKeys replaces hkeys in v4
+        return {
+            error: false,
+            data: result,
+            message: 'Successfully retrieved keys from Redis'
+        };
+    } catch (err) {
+        return {
+            error: true,
+            data: err.message,
+            msg: 'Error while retrieving keys from Redis'
+        };
+    }
+};
+
 // this.testRedis()
