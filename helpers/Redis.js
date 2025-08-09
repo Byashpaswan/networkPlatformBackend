@@ -411,7 +411,6 @@ exports.getRedisHashData = async function (hash, key) {
 
 exports.setRedisHashData = async function (hash, key, value, exp) {
   const fullKey = `${hash}:${key}`;
-   console.log("full keys--",fullkey);
 
   if (value == null || typeof value === 'undefined') {
     return {
