@@ -25,6 +25,15 @@ const webhookModel = require('../db/webhook')
 const rabbitMq = require('../helpers/rabbitMQ');
 const priorityRabbitMQ = require('../helpers/priorityRabbitMQ');
 const webhook_queue = "webhook_queue";
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+    cloud_name: `${process.env.CLOUDINARY_CLOUD_NAME}`,
+    api_key: `${process.env.CLOUDINARY_API_KEY}`,
+    api_secret: `${process.env.CLOUDINARY_API_SECRET}`
+});
+
 
 exports.getCacheData = async (hash, key) => {
     try {
@@ -156,28 +165,42 @@ const Storage = multer.diskStorage({
 
 
 
-const networkLogoStorage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        let networkId = req.user.userDetail.network[0]
-        const dir = "public/uploads/network/" + networkId;
+// const networkLogoStorage = multer.diskStorage({
+//     destination: function (req, file, callback) {
+//         let networkId = req.user.userDetail.network[0]
+//         const dir = "public/uploads/network/" + networkId;
 
-        fs.exists(dir, exist => {
-            if (!exist) {
+//         fs.exists(dir, exist => {
+//             if (!exist) {
 
-                return fs.mkdir(dir, { recursive: true }, error => callback(error, dir))
+//                 return fs.mkdir(dir, { recursive: true }, error => callback(error, dir))
 
-            }
-            callback(null, dir);
+//             }
+//             callback(null, dir);
 
-        })
+//         })
 
-    },
-    filename: function (req, file, callback) {
-        let companyName = req.user.userDetail.company_name;
-        file.originalname = companyName.toLowerCase().replace(/ /g, '') + "." + file.originalname.split('.').slice(-1).pop()
-        callback(null, file.originalname);
-    },
+//     },
+//     filename: function (req, file, callback) {
+//         let companyName = req.user.userDetail.company_name;
+//         file.originalname = companyName.toLowerCase().replace(/ /g, '') + "." + file.originalname.split('.').slice(-1).pop()
+//         callback(null, file.originalname);
+//     },
 
+// });
+
+
+const networkLogoStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    let networkId = req.user.userDetail.network[0];
+    let companyName = req.user.userDetail.company_name;
+    return {
+      folder: `network/${networkId}`,
+      public_id: companyName.toLowerCase().replace(/ /g, ""),
+      format: file.originalname.split('.').pop().toLowerCase()
+    };
+  }
 });
 
 const networkLogoStorageMedium = multer.diskStorage({
@@ -228,22 +251,31 @@ const networkLogoStorageSmall = multer.diskStorage({
 
 });
 
-const userProfileImageStorage = multer.diskStorage({
-    destination: function (req, file, callback) {
-        let networkId = req.user.userDetail.network[0];
-        const dir = "public/uploads/users/" + networkId + "/";
-        fs.exists(dir, exist => {
-            if (!exist) {
-                return fs.mkdir(dir, { recursive: true }, error => callback(error, dir))
-            }
-            callback(null, dir);
-        })
-    },
-    filename: function (req, file, callback) {
-        file.originalname = req.body.email + '.jpg';
-        callback(null, file.originalname);
-    },
+// const userProfileImageStorage = multer.diskStorage({
+//     destination: function (req, file, callback) {
+//         let networkId = req.user.userDetail.network[0];
+//         const dir = "public/uploads/users/" + networkId + "/";
+//         fs.exists(dir, exist => {
+//             if (!exist) {
+//                 return fs.mkdir(dir, { recursive: true }, error => callback(error, dir))
+//             }
+//             callback(null, dir);
+//         })
+//     },
+//     filename: function (req, file, callback) {
+//         file.originalname = req.body.email + '.jpg';
+//         callback(null, file.originalname);
+//     },
 
+// });
+
+const userProfileImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: (req) => `users/${req.user.userDetail.network[0]}`,
+    format: async (req, file) => 'jpg', // force jpg
+    public_id: (req, file) => req.body.email.replace(/@/g, '_') // unique name
+  }
 });
 
 const fileFilter = function (req, file, callback) {
