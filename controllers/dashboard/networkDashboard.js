@@ -70,7 +70,7 @@ async function getAllStats(dateRange, networkId) {
             sortBy = { '_id.year': 1, '_id.month': 1, '_id.day': 1 };
         }
 
-        let allStats = await DashboardStatsModel.countStats(filter, groupBy, sortBy);
+        let allStats = await DashboardStatsModel.countStats({}, groupBy, sortBy);
 
         if (dateRange == 'last_7_days/7_days_before_last_7_days') {
             let date = moment(filter['timeSlot']['$gte']).add(7, 'days');
@@ -175,7 +175,7 @@ async function getOverallStats(dateRange, networkId) {
             groupBy["day"] = { $dayOfMonth: { "date": "$timeSlot", "timezone": "Asia/Kolkata" } };
             sortBy = { '_id.year': 1, '_id.month': 1, '_id.day': 1 };
         }
-        result = await DailySummaryModel.countStats(filter, groupBy, sortBy);
+        result = await DailySummaryModel.countStats({}, groupBy, sortBy);
 
         let currentMinutes = moment().format('mm');
         let exp = 70 - currentMinutes;
@@ -208,7 +208,7 @@ async function getTopAdvertisers(dateRange, networkId, limit) {
         filter['timeSlot'] = getDateRange(dateRange);
         groupBy['advertiser_id'] = "$advertiser_id";
         sortBy = { conversion: -1 };
-        result = await AdvertiserSummaryModel.getAdvertiserStat(filter, groupBy, sortBy, limit);
+        result = await AdvertiserSummaryModel.getAdvertiserStat({}, groupBy, sortBy, limit);
 
         let currentMinutes = moment().format('mm');
         let exp = 70 - currentMinutes;
@@ -242,7 +242,7 @@ async function getTopPublishers(dateRange, networkId, limit) {
         filter['timeSlot'] = getDateRange(dateRange);
         groupBy['publisher_id'] = "$publisher_id";
         sortBy = { conversion: -1 };
-        result = await PublisherSummaryModel.getPublisherStat(filter, groupBy, sortBy, limit);
+        result = await PublisherSummaryModel.getPublisherStat({}, groupBy, sortBy, limit);
 
         let currentMinutes = moment().format('mm');
         let exp = 70 - currentMinutes;
