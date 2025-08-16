@@ -27,7 +27,15 @@ const expire = 600;
 const client = createClient({
   socket: {
     host: process.env.REDIS_HOST || 'redis-14114.c84.us-east-1-2.ec2.redns.redis-cloud.com',
-    port:Number(process.env.REDIS_PORT)|| 14114
+    port:Number(process.env.REDIS_PORT)|| 14114,
+     reconnectStrategy: (retries) => {
+      if (retries > 20) {
+        // stop retrying after 20 attempts
+        return new Error("Redis reconnect failed, stopping retries.");
+      }
+      // exponential backoff: 100ms, 200ms, 400ms... max 3s
+      return Math.min(retries * 100, 3000);
+    }
   },
   username: 'default',
   password:process.env.REDIS_PASSWORD ||'rFew2iVCPcOGQYAUcpSQJ1aJWNWOOHKN'
@@ -37,11 +45,12 @@ const client = createClient({
 client.on('connect', () => {
   debug('redis connected');
 });
+client.on("reconnecting", () => console.log("🔄 Redis reconnecting..."));
 
 client.on('error', (err) => {
   debug('Redis Client Error', err);
 });
-
+client.on("end", () => console.log("❌ Redis connection closed"));
 // ✅ Async function to connect Redis
 async function runRedis() {
   try {
